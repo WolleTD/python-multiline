@@ -1,5 +1,4 @@
 from .. import xterm
-from ..writer import strip_string
 import shutil
 import timeit
 
@@ -15,20 +14,20 @@ class MultiLinePrinter:
 
     def format_line(self, prefix, content, time, color=xterm.fg.reset):
         time_str = f"{time:6.1f}s" if time is not None else ""
-        max_len = self.width - len(time_str) - len(strip_string(prefix)) - 2
+        max_len = self.width - len(time_str) - len(prefix) - 2
         if len(content) > max_len:
             content = f"{content[:max_len - 3]}..."
-        return f"{prefix} {color}{content:{max_len}}{xterm.fg.reset} {time_str}"
+        return f"{color}{prefix} {content:{max_len}} {time_str}{xterm.fg.reset}"
 
     def _print_line(self, buffer, now, max_rows):
         lines = 0
         time = (now - buffer.start) if buffer.end == 0 else (buffer.end - buffer.start)
-        color = xterm.fg.reset if buffer.end == 0 else xterm.fg.white
+        color = xterm.fg.white if buffer.end == 0 else xterm.fg.blue
         print(self.format_line(buffer.id, buffer._title, time, color), file=self.stream)
         lines = lines + 1
         if buffer.end == 0:
             for line in buffer.lines[-max_rows:]:
-                print(self.format_line(f"{xterm.fg.cyan} =>", line, None), file=self.stream)
+                print(self.format_line(f" =>", line, None), file=self.stream)
                 lines = lines + 1
         return lines
 
@@ -46,5 +45,3 @@ class MultiLinePrinter:
         for buffer in streams.values():
             lines = lines + self._print_line(buffer, now, max_rows)
         return lines
-
-

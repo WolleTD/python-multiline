@@ -6,12 +6,11 @@ import signal
 import sys
 
 
-async def do_setup(idx, serl, ml_stream):
-    proc = await asyncio.create_subprocess_exec(
-            './dummy.sh',
-            str(idx),
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE)
+async def system_ml(cmd, ml_stream):
+    proc = await asyncio.create_subprocess_shell(
+        cmd,
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE)
 
     async def read_stream(stream, color='\033[0m'):
         # On EOL, stdout.readline() will return an empty string
@@ -23,8 +22,14 @@ async def do_setup(idx, serl, ml_stream):
 
     red = '\033[31m'
     await asyncio.gather(read_stream(proc.stdout), read_stream(proc.stderr, red), proc.wait())
-    ml_stream.close(f"Serial {serl}: Setup complete!")
     return proc.returncode
+
+
+async def do_setup(idx, serl, ml_stream):
+    ret = await system_ml(f"./dummy.sh {idx}", ml_stream)
+    msg = "Setup complete!" if ret == 0 else "Failed with code {ret}!"
+    ml_stream.close(f"Serial {serl}: {msg}")
+    return ret
 
 
 def read_serials():
@@ -35,14 +40,16 @@ def read_serials():
             ser = 0
             while ser == 0:
                 ser = int(input(f"Position {i} Serial: "))
-                # istty
+                if not sys.stdin.isatty():
+                    print(ser)
                 if 0 < ser < 65536 and ser not in serls.values():
                     serls[i] = ser
                 else:
                     print("Invalid/duplicate serial!")
                     ser = 0
         confirmation = input("Is this correct? [Y/n] ")
-        # istty
+        if not sys.stdin.isatty():
+            print(confirmation)
         if confirmation.lower() == "n":
             serls = {}
     return serls

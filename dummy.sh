@@ -12,7 +12,7 @@ for i in $(seq 1000); do
     echo "Race $i"
     sleep 0.005
 done
-echo "Unloading Ramdisk"
+echo "Unloading Ramdisk" >&2
 [[ $i = 3 ]] && sleep 2
 echo "Unloading modules"
 sleep 0.5

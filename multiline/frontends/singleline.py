@@ -1,5 +1,4 @@
 from .. import xterm
-from ..writer import strip_string
 import shutil
 import timeit
 
@@ -15,7 +14,7 @@ class SingleLinePrinter:
 
     def format_line(self, prefix, content, time, color=xterm.fg.reset):
         time_str = f"{time:6.1f}s" if time is not None else ""
-        max_len = self.width - len(time_str) - len(strip_string(prefix)) - 2
+        max_len = self.width - len(time_str) - len(prefix) - 2
         if len(content) > max_len:
             content = f"{content[:max_len - 3]}..."
         return f"{prefix} {color}{content:{max_len}}{xterm.fg.reset} {time_str}"
@@ -40,5 +39,3 @@ class SingleLinePrinter:
         for buffer in streams.values():
             lines = lines + self._print_line(buffer, now)
         return lines
-
-
