@@ -17,8 +17,9 @@ def strip_string(string):
 
 
 class TtyStream(Stream):
-    def __init__(self, stream_id: str):
+    def __init__(self, stream_id: str, writer):
         self.id = stream_id
+        self.writer = writer
         self._title = None
         self.start = timeit.default_timer()
         self.end = 0
@@ -32,6 +33,9 @@ class TtyStream(Stream):
             self.title(text)
         else:
             self.lines.append(strip_string(text))
+
+    def tail_msg(self, text: str):
+        self.writer.tail_msg(f"{self.id} {text}")
 
     def close(self, title: str = ''):
         if title:
@@ -52,6 +56,7 @@ class TtyWriter(Writer):
         self.running = False
         self.task = None
         self.inputs = {}
+        self.tail_msgs = []
 
     def start(self):
         self.running = True
@@ -60,13 +65,18 @@ class TtyWriter(Writer):
     async def stop(self):
         self.running = False
         await self.task
+        for msg in self.tail_msgs:
+            print(msg, file=self.stream)
 
     def status(self, text: str):
         self.status_text = text
 
+    def tail_msg(self, text: str):
+        self.tail_msgs.append(text)
+
     def __getitem__(self, item: str):
         if item not in self.inputs:
-            self.inputs[item] = TtyStream(item)
+            self.inputs[item] = TtyStream(item, self)
         return self.inputs[item]
 
     async def run(self):

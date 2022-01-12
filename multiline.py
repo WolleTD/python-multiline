@@ -27,7 +27,11 @@ async def system_ml(cmd, ml_stream):
 
 async def do_setup(idx, serl, ml_stream):
     ret = await system_ml(f"./dummy.sh {idx}", ml_stream)
-    msg = "Setup complete!" if ret == 0 else "Failed with code {ret}!"
+    if ret == 0:
+        msg = "Setup complete!"
+    else:
+        msg = f"Failed with code {ret}!"
+        [ml_stream.tail_msg(l) for l in ml_stream.lines]
     ml_stream.close(f"Serial {serl}: {msg}")
     return ret
 

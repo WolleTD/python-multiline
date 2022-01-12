@@ -8,6 +8,9 @@ class Stream:
     def close(self, title: str = ''):
         pass
 
+    def tail_dump(self, lines: int):
+        pass
+
 
 class Writer:
     def start(self):
@@ -17,6 +20,9 @@ class Writer:
         pass
 
     def status(self, text: str):
+        pass
+
+    def tail_msg(self, text: str):
         pass
 
     def __getitem__(self, item: str) -> Stream:

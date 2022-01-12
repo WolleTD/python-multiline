@@ -43,9 +43,17 @@ class PlainWriter(Writer):
     def __init__(self, stream):
         self.stream = stream
         self.inputs = {}
+        self.tail_msgs = []
+
+    def stop(self):
+        for msg in self.tail_msgs:
+            print(msg, file=self.stream)
 
     def status(self, text: str):
         print(f"Status: {text}{xterm.style.reset}", file=self.stream)
+
+    def tail_msg(self, text: str):
+        self.tail_msgs.append(strip_string(text))
 
     def __getitem__(self, item: str):
         if item not in self.inputs:

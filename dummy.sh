@@ -8,7 +8,8 @@ sleep 1 #.$i
 echo "Running rm -rf /"
 #sleep $((13 - i * 2))
 sleep $((7 - i))
-for i in $(seq 1000); do
+[[ $i = 4 ]] && exit 1
+for i in $(seq 100); do
     echo "Race $i"
     sleep 0.005
 done
